@@ -47,6 +47,14 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
+// Auto-push DB schema on startup
+const { execSync } = require('child_process');
+try {
+  execSync('./node_modules/.bin/prisma db push --accept-data-loss', { stdio: 'inherit' });
+  console.log('✅ Database schema synced');
+} catch (e) {
+  console.error('DB push failed:', e.message);
+}
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
