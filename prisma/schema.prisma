@@ -1,13 +1,11 @@
-// This is your Prisma schema file
-// Learn more: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -20,7 +18,7 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  communities Community[] @relation("CommunityCreator")
+  communities Community[]     @relation("CommunityCreator")
   posts       Post[]
   comments    Comment[]
   votes       Vote[]
@@ -45,8 +43,8 @@ model Community {
 }
 
 model CommunityMember {
-  id          String   @id @default(cuid())
-  joinedAt    DateTime @default(now())
+  id       String   @id @default(cuid())
+  joinedAt DateTime @default(now())
 
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
@@ -99,8 +97,8 @@ model Comment {
 }
 
 model Vote {
-  id   String   @id @default(cuid())
-  type VoteType
+  id        String   @id @default(cuid())
+  type      VoteType
   createdAt DateTime @default(now())
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
