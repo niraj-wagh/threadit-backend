@@ -3,7 +3,7 @@ const { execSync } = require('child_process');
 const express = require('express');
 const cors    = require('cors');
 
-// Auto push DB schema on startup
+// Auto push DB schema
 try {
   console.log('Syncing database schema...');
   execSync('node node_modules/prisma/build/index.js db push --accept-data-loss', {
@@ -20,30 +20,26 @@ const postRoutes      = require('./routes/posts');
 const commentRoutes   = require('./routes/comments');
 const voteRoutes      = require('./routes/votes');
 const userRoutes      = require('./routes/users');
+const seedRoutes      = require('./routes/seed');  // NEW
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
 
-// ── CORS — allow Vercel frontend + localhost ──────────
+// CORS — allow all Vercel and Render origins
 const allowedOrigins = [
   'http://localhost:3000',
-  'http://localhost:3001',
-  process.env.FRONTEND_URL,                        // from Render env
-  'https://threadit-frontend.vercel.app',          // hardcoded fallback
+  process.env.FRONTEND_URL,
+  'https://threadit-frontend.vercel.app',
 ].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    // Also allow any vercel.app subdomain (for preview deployments)
-    if (origin.endsWith('.vercel.app') || origin.endsWith('.onrender.com')) {
-      return callback(null, true);
-    }
-    console.log('CORS blocked origin:', origin);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      origin.endsWith('.onrender.com')
+    ) return callback(null, true);
     return callback(new Error('CORS not allowed'), false);
   },
   credentials: true,
@@ -51,25 +47,21 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-// Handle preflight requests
 app.options('*', cors());
-
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
 app.get('/',       (req, res) => res.json({ status: 'ok', message: 'Threadit API running' }));
 app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
-// Routes
 app.use('/api/auth',        authRoutes);
 app.use('/api/communities', communityRoutes);
 app.use('/api/posts',       postRoutes);
 app.use('/api/comments',    commentRoutes);
 app.use('/api/votes',       voteRoutes);
 app.use('/api/users',       userRoutes);
+app.use('/api/seed',        seedRoutes);  // NEW
 
-// Error handlers
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
