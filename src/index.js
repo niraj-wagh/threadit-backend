@@ -3,15 +3,17 @@ const { execSync } = require('child_process');
 const express = require('express');
 const cors    = require('cors');
 
-// Auto push DB schema
+// Auto push DB schema using DIRECT_URL
 try {
   console.log('Syncing database schema...');
   execSync('node node_modules/prisma/build/index.js db push --accept-data-loss', {
-    stdio: 'inherit', timeout: 60000,
+    stdio: 'inherit',
+    timeout: 60000,
+    env: { ...process.env }
   });
-  console.log('Database synced');
+  console.log('Database synced successfully');
 } catch (e) {
-  console.error('DB sync warning:', e.message);
+  console.error('DB sync warning (non-fatal):', e.message);
 }
 
 const authRoutes      = require('./routes/auth');
@@ -20,12 +22,12 @@ const postRoutes      = require('./routes/posts');
 const commentRoutes   = require('./routes/comments');
 const voteRoutes      = require('./routes/votes');
 const userRoutes      = require('./routes/users');
-const seedRoutes      = require('./routes/seed');  // NEW
+const seedRoutes      = require('./routes/seed');
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS — allow all Vercel and Render origins
+// CORS — IPv4 compatible origins
 const allowedOrigins = [
   'http://localhost:3000',
   process.env.FRONTEND_URL,
@@ -43,8 +45,8 @@ app.use(cors({
     return callback(new Error('CORS not allowed'), false);
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
 }));
 
 app.options('*', cors());
@@ -60,7 +62,7 @@ app.use('/api/posts',       postRoutes);
 app.use('/api/comments',    commentRoutes);
 app.use('/api/votes',       voteRoutes);
 app.use('/api/users',       userRoutes);
-app.use('/api/seed',        seedRoutes);  // NEW
+app.use('/api/seed',        seedRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -69,6 +71,6 @@ app.use((err, req, res, next) => {
 app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log('Server running on port ' + PORT);
-  console.log('Allowed origins:', allowedOrigins);
+  console.log('Server on port ' + PORT);
+  console.log('Origins:', allowedOrigins);
 });
