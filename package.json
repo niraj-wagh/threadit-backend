@@ -3,17 +3,15 @@
   "version": "1.0.0",
   "description": "Threadit Reddit Clone - Backend API",
   "main": "src/index.js",
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "postinstall": "node node_modules/.bin/prisma generate",
-    "db:generate": "node node_modules/.bin/prisma generate",
-    "db:push": "node node_modules/.bin/prisma db push",
-    "db:migrate": "node node_modules/.bin/prisma migrate dev",
+    "postinstall": "node node_modules/prisma/build/index.js generate",
+    "db:push": "node node_modules/prisma/build/index.js db push",
     "db:seed": "node prisma/seed.js"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   },
   "dependencies": {
     "@prisma/client": "^5.7.0",

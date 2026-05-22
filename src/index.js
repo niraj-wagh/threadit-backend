@@ -3,15 +3,16 @@ const { execSync } = require('child_process');
 const express = require('express');
 const cors    = require('cors');
 
-// ── Auto-sync DB schema on startup ───────────────────
+// Auto push DB schema on startup
 try {
-  console.log('🔄 Syncing database schema...');
-  execSync('node node_modules/.bin/prisma db push --accept-data-loss', {
-    stdio: 'inherit', timeout: 60000,
+  console.log('Syncing database schema...');
+  execSync('node node_modules/prisma/build/index.js db push --accept-data-loss', {
+    stdio: 'inherit',
+    timeout: 60000,
   });
-  console.log('✅ Database synced');
+  console.log('Database synced successfully');
 } catch (e) {
-  console.error('⚠️  DB sync warning:', e.message);
+  console.error('DB sync warning:', e.message);
 }
 
 const authRoutes      = require('./routes/auth');
@@ -31,10 +32,11 @@ app.use(cors({
   ],
   credentials: true,
 }));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/',       (req, res) => res.json({ status: 'ok', message: 'Threadit API 🚀' }));
+app.get('/',       (req, res) => res.json({ status: 'ok', message: 'Threadit API running' }));
 app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
 app.use('/api/auth',        authRoutes);
@@ -48,8 +50,9 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
 });
+
 app.use((req, res) => res.status(404).json({ error: 'Route not found' }));
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log('Server running on port ' + PORT);
 });
