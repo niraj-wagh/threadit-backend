@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -17,8 +16,7 @@ model User {
   bio       String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-
-  communities Community[]     @relation("CommunityCreator")
+  communities Community[] @relation("CommunityCreator")
   posts       Post[]
   comments    Comment[]
   votes       Vote[]
@@ -34,82 +32,65 @@ model Community {
   banner      String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  creator   User   @relation("CommunityCreator", fields: [creatorId], references: [id])
-  creatorId String
-
-  posts   Post[]
-  members CommunityMember[]
+  creator     User     @relation("CommunityCreator", fields: [creatorId], references: [id])
+  creatorId   String
+  posts       Post[]
+  members     CommunityMember[]
 }
 
 model CommunityMember {
-  id       String   @id @default(cuid())
-  joinedAt DateTime @default(now())
-
+  id          String    @id @default(cuid())
+  joinedAt    DateTime  @default(now())
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
   community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
   communityId String
-
   @@unique([userId, communityId])
 }
 
 model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  imageUrl  String?
-  linkUrl   String?
-  type      PostType @default(TEXT)
-  score     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id          String   @id @default(cuid())
+  title       String
+  content     String?
+  imageUrl    String?
+  linkUrl     String?
+  type        PostType @default(TEXT)
+  score       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
   communityId String
   author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId    String
-
-  comments Comment[]
-  votes    Vote[]
+  comments    Comment[]
+  votes       Vote[]
 }
 
-enum PostType {
-  TEXT
-  IMAGE
-  LINK
-}
+enum PostType { TEXT IMAGE LINK }
 
 model Comment {
   id        String   @id @default(cuid())
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  post     Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId   String
-  author   User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId String
-
-  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
-  parentId String?
-  replies  Comment[] @relation("CommentReplies")
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  parentId  String?
+  replies   Comment[] @relation("CommentReplies")
 }
 
 model Vote {
   id        String   @id @default(cuid())
   type      VoteType
   createdAt DateTime @default(now())
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId String
-
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
   @@unique([userId, postId])
 }
 
-enum VoteType {
-  UP
-  DOWN
-}
+enum VoteType { UP DOWN }

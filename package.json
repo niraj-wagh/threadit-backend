@@ -2,15 +2,12 @@
   "name": "reddit-clone-backend",
   "version": "1.0.0",
   "main": "src/index.js",
-  "engines": {
-    "node": "18.x"
-  },
+  "engines": { "node": "18.x" },
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "postinstall": "node node_modules/prisma/build/index.js generate",
-    "db:push": "node node_modules/prisma/build/index.js db push",
-    "db:seed": "node prisma/seed.js"
+    "db:push": "node node_modules/prisma/build/index.js db push"
   },
   "dependencies": {
     "@prisma/client": "^5.7.0",
@@ -22,7 +19,5 @@
     "jsonwebtoken": "^9.0.2",
     "prisma": "^5.7.0"
   },
-  "devDependencies": {
-    "nodemon": "^3.0.2"
-  }
+  "devDependencies": { "nodemon": "^3.0.2" }
 }
