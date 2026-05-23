@@ -1,20 +1,6 @@
 require('dotenv').config();
-const { execSync } = require('child_process');
 const express = require('express');
 const cors    = require('cors');
-
-// Auto push DB schema using DIRECT_URL
-try {
-  console.log('Syncing database schema...');
-  execSync('node node_modules/prisma/build/index.js db push --accept-data-loss', {
-    stdio: 'inherit',
-    timeout: 60000,
-    env: { ...process.env }
-  });
-  console.log('Database synced successfully');
-} catch (e) {
-  console.error('DB sync warning (non-fatal):', e.message);
-}
 
 const authRoutes      = require('./routes/auth');
 const communityRoutes = require('./routes/communities');
@@ -27,7 +13,7 @@ const seedRoutes      = require('./routes/seed');
 const app  = express();
 const PORT = process.env.PORT || 5000;
 
-// CORS — IPv4 compatible origins
+// CORS
 const allowedOrigins = [
   'http://localhost:3000',
   process.env.FRONTEND_URL,
@@ -42,20 +28,22 @@ app.use(cors({
       origin.endsWith('.vercel.app') ||
       origin.endsWith('.onrender.com')
     ) return callback(null, true);
-    return callback(new Error('CORS not allowed'), false);
+    return callback(new Error('CORS blocked: ' + origin), false);
   },
   credentials: true,
-  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.options('*', cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/',       (req, res) => res.json({ status: 'ok', message: 'Threadit API running' }));
+// Health
+app.get('/',       (req, res) => res.json({ status: 'ok', message: 'Threadit API' }));
 app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
+// Routes
 app.use('/api/auth',        authRoutes);
 app.use('/api/communities', communityRoutes);
 app.use('/api/posts',       postRoutes);
