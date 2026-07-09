@@ -66,7 +66,11 @@ model Post {
   votes       Vote[]
 }
 
-enum PostType { TEXT IMAGE LINK }
+enum PostType {
+  TEXT
+  IMAGE
+  LINK
+}
 
 model Comment {
   id        String   @id @default(cuid())
@@ -93,4 +97,7 @@ model Vote {
   @@unique([userId, postId])
 }
 
-enum VoteType { UP DOWN }
+enum VoteType {
+  UP
+  DOWN
+}
