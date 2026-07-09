@@ -60,8 +60,9 @@ router.post('/login', [
 
     const { password: _, ...safe } = user;
     res.json({ user: safe, token: generateToken(user.id) });
-  } catch (e) {
-    res.status(500).json({ error: 'Login failed' });
+} catch (e) {
+    console.error('LOGIN ERROR:', e);
+    res.status(500).json({ error: 'Login failed', detail: e.message });
   }
 });
 
